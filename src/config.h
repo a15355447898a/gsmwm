@@ -63,7 +63,7 @@
 #define RESIZE_WIN_HEIGHT ROUND(RESIZE_WIN_FONT_PIXEL_SIZE*4/3.0) // 調整尺寸的提示窗口的高度，單位爲像素
 #define MOVE_RESIZE_INC 8 // 移動窗口、調整窗口尺寸的步進值，單位爲像素。僅當窗口未有效設置尺寸特性時才使用它。
 
-#define RUN_CMD_ENTRY_HINT L"請輸入命令，然後按回車執行"
+#define RUN_CMD_ENTRY_HINT L"请输入命令，然后按回车运行"
 #define DEFAULT_FONT_NAME "monospace:pixelsize="TO_STR(DEFAULT_FONT_PIXEL_SIZE) // 默認字體名
 
 #define FONT_NAME (const char *[]) /* 本窗口管理器所使用的字庫名稱列表 */                       \
@@ -120,18 +120,18 @@
 #define TASKBAR_BUTTON_TEXT (const char *[]) /* 任務欄按鈕的標籤（從左至右） */  \
 {/* 依次爲各虛擬桌面標籤 */ \
     "1",   "2",   "3",   \
-/* 切換至全屏模式 切換至概覽模式 切換至堆疊模式 切換至平鋪模式 切換桌面可見性 打開操作中心*/ \
+/* 切换至全屏模式 切换至概览模式 切换至堆疊模式 切换至平鋪模式 切换桌面可見性 打开操作中心*/ \
     "□",           "▦",         "▣",          "▥",          "■",        "^",    \
 }
 
 #define CMD_CENTER_ITEM_TEXT (const char *[]) /* 操作中心按鈕的標籤（從左至右，從上至下） */  \
 {\
-    "幫助",         "文件",         "終端模擬器",   "網絡瀏覽器",   \
-    "播放影音",     "切換播放狀態", "關閉影音",     "减小音量",     \
+    "帮助",         "文件",         "终端模拟器",   "网络浏览器",   \
+    "播放影音",     "切換播放状态", "關閉影音",     "减小音量",     \
     "增大音量",     "最大音量",     "靜音切換",     "暫主區開窗",   \
     "暫次區開窗",   "暫固定區開窗", "暫懸浮區開窗", "暫縮微區開窗", \
     "增大主區容量", "减小主區容量", "切換聚焦模式", "退出gwm",      \
-    "注銷",         "重啓",         "關機",         "運行",         \
+    "注销",         "重启",         "关机",         "运行",         \
 }
 
 #define CURSOR_SHAPE (unsigned int []) /* 定位器相關的光標字體 */  \
@@ -322,7 +322,7 @@
     {CLIENT_WIN,         WM_SKEY, Button1, pointer_move_resize_client, {.resize=true}},             \
     {CLIENT_WIN,          WM_KEY, Button2, pointer_change_area,        {0}},                        \
     {CLIENT_WIN,          WM_KEY, Button3, pointer_swap_clients,       {0}},                        \
-    {CLIENT_WIN,               0, Button3, choose_client,                       {0}},                        \
+    {CLIENT_WIN,               0, Button3, choose_client,              {0}},                        \
     {CLIENT_FRAME,             0, Button1, pointer_move_resize_client, {.resize=true}},             \
     {CLIENT_ICON,              0, Button1, change_area,                {.area_type=PREV_AREA}},     \
     {CLIENT_ICON,              0, Button2, pointer_change_area,        {0}},                        \
