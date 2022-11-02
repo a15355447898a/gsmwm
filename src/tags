@@ -59,6 +59,7 @@ CURRENT_BORDER_COLOR	gwm.h	/^    NORMAL_BORDER_COLOR, CURRENT_BORDER_COLOR,$/;"	
 CURRENT_TITLE_AREA_COLOR	gwm.h	/^    NORMAL_TITLE_AREA_COLOR, CURRENT_TITLE_AREA_COLOR,$/;"	e	enum:widget_color_tag
 CURRENT_TITLE_BUTTON_COLOR	gwm.h	/^    NORMAL_TITLE_BUTTON_COLOR, CURRENT_TITLE_BUTTON_COLOR,$/;"	e	enum:widget_color_tag
 CURSOR_SHAPE	config.h	/^#define CURSOR_SHAPE /;"	d
+CUR_ICON_THEME	config.h	/^#define CUR_ICON_THEME /;"	d
 Client	gwm.h	/^typedef struct client_tag Client;$/;"	t	typeref:struct:client_tag
 DEFAULT_AREA_TYPE	config.h	/^#define DEFAULT_AREA_TYPE /;"	d
 DEFAULT_CUR_DESKTOP	config.h	/^#define DEFAULT_CUR_DESKTOP /;"	d
@@ -97,7 +98,7 @@ ENTRY_FONT_PIXEL_SIZE	config.h	/^#define ENTRY_FONT_PIXEL_SIZE /;"	d
 ENTRY_H	entry.h	/^#define ENTRY_H$/;"	d
 ENTRY_TEXT_COLOR	gwm.h	/^    CMD_CENTER_ITEM_TEXT_COLOR, ENTRY_TEXT_COLOR, HINT_TEXT_COLOR,$/;"	e	enum:text_color_tag
 ENTRY_TEXT_INDENT	config.h	/^#define ENTRY_TEXT_INDENT /;"	d
-EWMH_ATOM_N	gwm.h	/^    _NET_WM_STATE, _NET_WM_STATE_MODAL, EWMH_ATOM_N$/;"	e	enum:ewmh_atom_tag
+EWMH_ATOM_N	gwm.h	/^    _NET_WM_STATE, _NET_WM_STATE_MODAL, _NET_WM_ICON, EWMH_ATOM_N$/;"	e	enum:ewmh_atom_tag
 EWMH_NAME	gwm.h	/^#define EWMH_NAME /;"	d
 Entry	gwm.h	/^typedef struct entry_tag Entry;$/;"	t	typeref:struct:entry_tag
 Ewmh_atom	gwm.h	/^typedef enum ewmh_atom_tag Ewmh_atom;$/;"	t	typeref:enum:ewmh_atom_tag
@@ -135,21 +136,27 @@ ICONIFY_AREA	gwm.h	/^     MAIN_AREA, SECOND_AREA, FIXED_AREA, FLOATING_AREA, ICO
 ICONS_SPACE	config.h	/^#define ICONS_SPACE /;"	d
 ICON_AREA_COLOR	gwm.h	/^    CMD_CENTER_COLOR, ICON_COLOR, ICON_AREA_COLOR, STATUS_AREA_COLOR,$/;"	e	enum:widget_color_tag
 ICON_BORDER_WIDTH	config.h	/^#define ICON_BORDER_WIDTH /;"	d
+ICON_BUF_SIZE	icon.c	/^#define ICON_BUF_SIZE /;"	d	file:
 ICON_BUTTON	gwm.h	/^    ICON_BUTTON, MAX_BUTTON, CLOSE_BUTTON,$/;"	e	enum:widget_type_tag
 ICON_CLASS_FONT	gwm.h	/^    TASKBAR_BUTTON_FONT, ICON_CLASS_FONT, ICON_TITLE_FONT, STATUS_AREA_FONT,$/;"	e	enum:font_type_tag
 ICON_CLASS_TEXT_COLOR	gwm.h	/^    ICON_CLASS_TEXT_COLOR, ICON_TITLE_TEXT_COLOR,$/;"	e	enum:text_color_tag
 ICON_COLOR	gwm.h	/^    CMD_CENTER_COLOR, ICON_COLOR, ICON_AREA_COLOR, STATUS_AREA_COLOR,$/;"	e	enum:widget_color_tag
 ICON_EVENT_MASK	gwm.h	/^#define ICON_EVENT_MASK /;"	d
-ICON_HEIGHT	config.h	/^#define ICON_HEIGHT /;"	d
+ICON_EXT	icon.c	/^#define ICON_EXT /;"	d	file:
+ICON_H	icon.h	/^#define ICON_H$/;"	d
 ICON_NEW_BUTTON	gwm.h	/^    ICON_NEW_BUTTON, N_MAIN_UP_BUTTON, N_MAIN_DOWN_BUTTON, FOCUS_MODE_BUTTON,$/;"	e	enum:widget_type_tag
+ICON_SIZE	config.h	/^#define ICON_SIZE /;"	d
+ICON_THEME_PER_DIR_KEYS	icon.c	/^#define ICON_THEME_PER_DIR_KEYS /;"	d	file:
 ICON_TITLE_FONT	gwm.h	/^    TASKBAR_BUTTON_FONT, ICON_CLASS_FONT, ICON_TITLE_FONT, STATUS_AREA_FONT,$/;"	e	enum:font_type_tag
 ICON_TITLE_TEXT_COLOR	gwm.h	/^    ICON_CLASS_TEXT_COLOR, ICON_TITLE_TEXT_COLOR,$/;"	e	enum:text_color_tag
+ICON_WIN_WIDTH_MAX	config.h	/^#define ICON_WIN_WIDTH_MAX /;"	d
 INIT_H	init.h	/^#define INIT_H$/;"	d
 IS_CMD_CENTER_ITEM	gwm.h	/^#define IS_CMD_CENTER_ITEM(/;"	d
 IS_TASKBAR_BUTTON	gwm.h	/^#define IS_TASKBAR_BUTTON(/;"	d
 IS_TITLE_BUTTON	gwm.h	/^#define IS_TITLE_BUTTON(/;"	d
 Icccm_atom	gwm.h	/^typedef enum icccm_atom_tag Icccm_atom;$/;"	t	typeref:enum:icccm_atom_tag
 Icon	gwm.h	/^typedef struct icon_tag Icon;$/;"	t	typeref:struct:icon_tag
+Icon_dir_info	icon.c	/^typedef struct icon_dir_info_tag Icon_dir_info;$/;"	t	typeref:struct:icon_dir_info_tag	file:
 KEYBIND	config.h	/^#define KEYBIND /;"	d
 Keybind	gwm.h	/^typedef struct keybind_tag Keybind;$/;"	t	typeref:struct:keybind_tag
 LAYOUT_BUTTON_BEGIN	gwm.h	/^    LAYOUT_BUTTON_BEGIN=FULL_BUTTON, LAYOUT_BUTTON_END=TILE_BUTTON, $/;"	e	enum:widget_type_tag
@@ -169,6 +176,7 @@ MAIN_BUTTON	gwm.h	/^    MAIN_BUTTON, SECOND_BUTTON, FIXED_BUTTON, FLOAT_BUTTON,$
 MAIN_NEW_BUTTON	gwm.h	/^    MAIN_NEW_BUTTON, SEC_NEW_BUTTON, FIX_NEW_BUTTON, FLOAT_NEW_BUTTON,$/;"	e	enum:widget_type_tag
 MAX_BUTTON	gwm.h	/^    ICON_BUTTON, MAX_BUTTON, CLOSE_BUTTON,$/;"	e	enum:widget_type_tag
 MENU_H	menu.h	/^#define MENU_H$/;"	d
+MIN	gwm.h	/^#define MIN(/;"	d
 MISC_H	misc.h	/^#define MISC_H$/;"	d
 MOVE	gwm.h	/^    NO_OP, MOVE, SWAP, CHANGE, TOP_RESIZE, BOTTOM_RESIZE, LEFT_RESIZE,$/;"	e	enum:pointer_act_tag
 MOVE_RESIZE_INC	config.h	/^#define MOVE_RESIZE_INC /;"	d
@@ -222,6 +230,7 @@ SECOND_AREA	gwm.h	/^     MAIN_AREA, SECOND_AREA, FIXED_AREA, FLOATING_AREA, ICON
 SECOND_BUTTON	gwm.h	/^    MAIN_BUTTON, SECOND_BUTTON, FIXED_BUTTON, FLOAT_BUTTON,$/;"	e	enum:widget_type_tag
 SEC_NEW_BUTTON	gwm.h	/^    MAIN_NEW_BUTTON, SEC_NEW_BUTTON, FIX_NEW_BUTTON, FLOAT_NEW_BUTTON,$/;"	e	enum:widget_type_tag
 SET_DEF_VAL	gwm.h	/^#define SET_DEF_VAL(/;"	d
+SET_FRAME_PROP	config.h	/^#define SET_FRAME_PROP /;"	d
 SH_CMD	gwm.h	/^#define SH_CMD(/;"	d
 STACK	gwm.h	/^    FULL, PREVIEW, STACK, TILE,$/;"	e	enum:layout_tag
 STACK_BUTTON	gwm.h	/^    FULL_BUTTON, PREVIEW_BUTTON, STACK_BUTTON, TILE_BUTTON, DESKTOP_BUTTON,$/;"	e	enum:widget_type_tag
@@ -279,6 +288,7 @@ UNDEFINED	gwm.h	/^    UNDEFINED, ROOT_WIN, STATUS_AREA, RUN_CMD_ENTRY,$/;"	e	enu
 UP	gwm.h	/^    UP, DOWN, LEFT, RIGHT, $/;"	e	enum:direction_tag
 UP2DOWN	gwm.h	/^    UP2UP, UP2DOWN, DOWN2UP, DOWN2DOWN,$/;"	e	enum:direction_tag
 UP2UP	gwm.h	/^    UP2UP, UP2DOWN, DOWN2UP, DOWN2DOWN,$/;"	e	enum:direction_tag
+USE_IMAGE_ICON	config.h	/^#define USE_IMAGE_ICON /;"	d
 VOLUME_DOWN	config.h	/^#define VOLUME_DOWN /;"	d
 VOLUME_DOWN_BUTTON	gwm.h	/^    VOLUME_DOWN_BUTTON, VOLUME_UP_BUTTON, VOLUME_MAX_BUTTON, VOLUME_TOGGLE_BUTTON,$/;"	e	enum:widget_type_tag
 VOLUME_MAX	config.h	/^#define VOLUME_MAX /;"	d
@@ -298,8 +308,9 @@ WM_SKEY	config.h	/^#define WM_SKEY /;"	d
 WM_TAKE_FOCUS	gwm.h	/^    WM_PROTOCOLS, WM_DELETE_WINDOW, WM_TAKE_FOCUS, ICCCM_ATOMS_N$/;"	e	enum:icccm_atom_tag
 Widget_color	gwm.h	/^typedef enum widget_color_tag Widget_color;$/;"	t	typeref:enum:widget_color_tag
 Widget_type	gwm.h	/^typedef enum widget_type_tag Widget_type;$/;"	t	typeref:enum:widget_type_tag
-_NET_WM_STATE	gwm.h	/^    _NET_WM_STATE, _NET_WM_STATE_MODAL, EWMH_ATOM_N$/;"	e	enum:ewmh_atom_tag
-_NET_WM_STATE_MODAL	gwm.h	/^    _NET_WM_STATE, _NET_WM_STATE_MODAL, EWMH_ATOM_N$/;"	e	enum:ewmh_atom_tag
+_NET_WM_ICON	gwm.h	/^    _NET_WM_STATE, _NET_WM_STATE_MODAL, _NET_WM_ICON, EWMH_ATOM_N$/;"	e	enum:ewmh_atom_tag
+_NET_WM_STATE	gwm.h	/^    _NET_WM_STATE, _NET_WM_STATE_MODAL, _NET_WM_ICON, EWMH_ATOM_N$/;"	e	enum:ewmh_atom_tag
+_NET_WM_STATE_MODAL	gwm.h	/^    _NET_WM_STATE, _NET_WM_STATE_MODAL, _NET_WM_ICON, EWMH_ATOM_N$/;"	e	enum:ewmh_atom_tag
 _NET_WM_WINDOW_TYPE	gwm.h	/^    _NET_WM_WINDOW_TYPE, _NET_WM_WINDOW_TYPE_NORMAL,$/;"	e	enum:ewmh_atom_tag
 _NET_WM_WINDOW_TYPE_NORMAL	gwm.h	/^    _NET_WM_WINDOW_TYPE, _NET_WM_WINDOW_TYPE_NORMAL,$/;"	e	enum:ewmh_atom_tag
 _TO_STR	config.h	/^#define _TO_STR(/;"	d
@@ -363,12 +374,13 @@ colormap	gwm.h	/^    Colormap colormap; \/\/ 着色圖$/;"	m	struct:wm_tag	typer
 compare_client_order	client.c	/^int compare_client_order(WM *wm, Client *c1, Client *c2)$/;"	f	typeref:typename:int
 config_managed_client	handler.c	/^static void config_managed_client(WM *wm, Client *c)$/;"	f	typeref:typename:void	file:
 config_unmanaged_win	handler.c	/^static void config_unmanaged_win(WM *wm, XConfigureRequestEvent *e)$/;"	f	typeref:typename:void	file:
-copy_string	font.c	/^static char *copy_string(const char *s)$/;"	f	typeref:typename:char *	file:
+copy_string	misc.c	/^char *copy_string(const char *s)$/;"	f	typeref:typename:char *
+copy_strings	misc.c	/^char *copy_strings(const char *s, ...) \/\/ 調用時須以NULL結尾$/;"	f	typeref:typename:char *
 create_clients	init.c	/^static void create_clients(WM *wm)$/;"	f	typeref:typename:void	file:
 create_cmd_center	init.c	/^static void create_cmd_center(WM *wm)$/;"	f	typeref:typename:void	file:
 create_cursors	init.c	/^static void create_cursors(WM *wm)$/;"	f	typeref:typename:void	file:
 create_entry	entry.c	/^void create_entry(WM *wm, Entry *e, Rect *r, wchar_t *hint)$/;"	f	typeref:typename:void
-create_icon	client.c	/^static void create_icon(WM *wm, Client *c)$/;"	f	typeref:typename:void	file:
+create_icon	icon.c	/^static void create_icon(WM *wm, Client *c)$/;"	f	typeref:typename:void	file:
 create_icon_area	init.c	/^static void create_icon_area(WM *wm)$/;"	f	typeref:typename:void	file:
 create_menu	menu.c	/^void create_menu(WM *wm, Menu *menu, unsigned int n, unsigned int col, unsigned int w, unsigned /;"	f	typeref:typename:void
 create_resize_win	init.c	/^static void create_resize_win(WM *wm)$/;"	f	typeref:typename:void	file:
@@ -383,11 +395,11 @@ cur_layout	gwm.h	/^    Layout cur_layout, prev_layout; \/\/ 分別爲當前布�
 cursor_offset	gwm.h	/^    size_t cursor_offset;$/;"	m	struct:entry_tag	typeref:typename:size_t
 cursors	gwm.h	/^    Cursor cursors[POINTER_ACT_N]; \/\/ 光標$/;"	m	struct:wm_tag	typeref:typename:Cursor[]
 default_area_type	gwm.h	/^    Area_type default_area_type; \/\/ 默認的窗口區域類型$/;"	m	struct:desktop_tag	typeref:typename:Area_type
-deiconify	client.c	/^void deiconify(WM *wm, Client *c)$/;"	f	typeref:typename:void
+deiconify	icon.c	/^void deiconify(WM *wm, Client *c)$/;"	f	typeref:typename:void
 deiconify_all_clients	func.c	/^void deiconify_all_clients(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:void
 del_client	client.c	/^void del_client(WM *wm, Client *c)$/;"	f	typeref:typename:void
 del_client_node	client.c	/^void del_client_node(Client *c)$/;"	f	typeref:typename:void
-del_icon	client.c	/^void del_icon(WM *wm, Client *c)$/;"	f	typeref:typename:void
+del_icon	icon.c	/^void del_icon(WM *wm, Client *c)$/;"	f	typeref:typename:void
 delta_rect_tag	gwm.h	/^struct delta_rect_tag \/* 調整窗口尺寸的信息 *\/$/;"	s
 desktop	gwm.h	/^    Desktop desktop[DESKTOP_N]; \/\/ 虛擬桌面$/;"	m	struct:wm_tag	typeref:typename:Desktop[]
 desktop_mask	gwm.h	/^    unsigned int title_bar_h, border_w, desktop_mask; \/\/ 客戶窗口標題欄高度和邊框寬/;"	m	struct:rule_tag	typeref:typename:unsigned int
@@ -411,8 +423,11 @@ exec	func.c	/^void exec(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:
 exit_with_msg	misc.c	/^void exit_with_msg(const char *msg)$/;"	f	typeref:typename:void
 exit_with_perror	misc.c	/^void exit_with_perror(const char *s)$/;"	f	typeref:typename:void
 fg	gwm.h	/^    XftColor fg; \/\/ 字符串的前景色$/;"	m	struct:string_format_tag	typeref:typename:XftColor
+find_icon	icon.c	/^static char *find_icon(const char *name, int size, int scale, const char *context_dir)$/;"	f	typeref:typename:char *	file:
+find_icon_helper	icon.c	/^static char *find_icon_helper(const char *name, int size, int scale, char *const *base_dirs, con/;"	f	typeref:typename:char *	file:
 fix_area_type	client.c	/^void fix_area_type(WM *wm)$/;"	f	typeref:typename:void
 fix_cur_focus_client_rect	layout.c	/^static void fix_cur_focus_client_rect(WM *wm)$/;"	f	typeref:typename:void	file:
+fix_icon_dir_info	icon.c	/^static void fix_icon_dir_info(Icon_dir_info *info)$/;"	f	typeref:typename:void	file:
 fix_win_rect_for_frame	layout.c	/^static void fix_win_rect_for_frame(WM *wm)$/;"	f	typeref:typename:void	file:
 fixed_area_ratio	gwm.h	/^    double main_area_ratio, fixed_area_ratio; \/\/ 分別爲主要和固定區域屏佔比$/;"	m	struct:desktop_tag	typeref:typename:double
 focus	gwm.h	/^    bool focus; \/\/ 是否聚焦的標志$/;"	m	union:func_arg_tag	typeref:typename:bool
@@ -435,26 +450,41 @@ gc	gwm.h	/^    GC gc; \/\/ 窗口管理器的圖形信息$/;"	m	struct:wm_tag	ty
 get_area_head	client.c	/^Client *get_area_head(WM *wm, Area_type type)$/;"	f	typeref:typename:Client *
 get_area_size	layout.c	/^static void get_area_size(WM *wm, unsigned int *mw, unsigned int *mh, unsigned int *sw, unsigned/;"	f	typeref:typename:void	file:
 get_atom_prop	misc.c	/^Atom get_atom_prop(WM *wm, Window win, Atom prop)$/;"	f	typeref:typename:Atom
+get_base_dirs	icon.c	/^static char **get_base_dirs(void)$/;"	f	typeref:typename:char **	file:
 get_button_rect	client.c	/^static Rect get_button_rect(Client *c, size_t index)$/;"	f	typeref:typename:Rect	file:
 get_client_col	hint.c	/^unsigned int get_client_col(WM *wm, Client *c, XSizeHints *hint)$/;"	f	typeref:typename:unsigned int
 get_client_row	hint.c	/^unsigned int get_client_row(WM *wm, Client *c, XSizeHints *hint)$/;"	f	typeref:typename:unsigned int
 get_clients_n	layout.c	/^static unsigned int get_clients_n(WM *wm)$/;"	f	typeref:typename:unsigned int	file:
 get_desktop_mask	desktop.c	/^unsigned int get_desktop_mask(unsigned int desktop_n)$/;"	f	typeref:typename:unsigned int
 get_desktop_n	desktop.c	/^unsigned int get_desktop_n(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:unsigned int
+get_dir_info_from_index_theme	icon.c	/^static bool get_dir_info_from_index_theme(const char *base_dir, const char *theme, const char *s/;"	f	typeref:typename:bool	file:
+get_dir_size_distance	icon.c	/^static int get_dir_size_distance(const char *base_dir, const char *theme, const char *sub_dir, i/;"	f	typeref:typename:int	file:
+get_drawable_size	misc.c	/^void get_drawable_size(WM *wm, Drawable drw, unsigned int *w, unsigned int *h)$/;"	f	typeref:typename:void
 get_entry_cursor_x	entry.c	/^static int get_entry_cursor_x(WM *wm, Entry *e)$/;"	f	typeref:typename:int	file:
 get_fixed_height_inc	hint.c	/^static int get_fixed_height_inc(unsigned int h, XSizeHints *hint)$/;"	f	typeref:typename:int	file:
 get_fixed_size_hint	hint.c	/^XSizeHints get_fixed_size_hint(WM *wm, Client *c)$/;"	f	typeref:typename:XSizeHints
 get_fixed_width_inc	hint.c	/^static int get_fixed_width_inc(unsigned int w, XSizeHints *hint)$/;"	f	typeref:typename:int	file:
 get_frame_rect	client.c	/^static Rect get_frame_rect(Client *c)$/;"	f	typeref:typename:Rect	file:
+get_icon_dir_info_from_buf	icon.c	/^static bool get_icon_dir_info_from_buf(char *buf, size_t size, Icon_dir_info *info)$/;"	f	typeref:typename:bool	file:
+get_icon_image	icon.c	/^static Imlib_Image get_icon_image(WM *wm, Client *c)$/;"	f	typeref:typename:Imlib_Image	file:
+get_icon_image_from_file	icon.c	/^static Imlib_Image get_icon_image_from_file(WM *wm, Client *c)$/;"	f	typeref:typename:Imlib_Image	file:
+get_icon_image_from_hint	icon.c	/^static Imlib_Image get_icon_image_from_hint(WM *wm, Client *c)$/;"	f	typeref:typename:Imlib_Image	file:
+get_icon_image_from_prop	icon.c	/^static Imlib_Image get_icon_image_from_prop(WM *wm, Client *c)$/;"	f	typeref:typename:Imlib_Image	file:
+get_icon_pixmap	icon.c	/^static Pixmap get_icon_pixmap(WM *wm, Client *c)$/;"	f	typeref:typename:Pixmap	file:
 get_key_delta_rect	func.c	/^static Delta_rect get_key_delta_rect(Client *c, XSizeHints *hint, Direction dir)$/;"	f	typeref:typename:Delta_rect	file:
+get_list_val_from_index_theme	icon.c	/^static char **get_list_val_from_index_theme(const char *base_dir, const char *theme, const char /;"	f	typeref:typename:char **	file:
 get_modifier_mask	grab.c	/^static unsigned int get_modifier_mask(WM *wm, KeySym key_sym)$/;"	f	typeref:typename:unsigned int	file:
 get_next_client	client.c	/^Client *get_next_client(WM *wm, Client *c)$/;"	f	typeref:typename:Client *
 get_num_lock_mask	grab.c	/^static unsigned int get_num_lock_mask(WM *wm)$/;"	f	typeref:typename:unsigned int	file:
+get_parent_themes	icon.c	/^static char **get_parent_themes(const char *base_dir, const char *theme)$/;"	f	typeref:typename:char **	file:
 get_pointer_delta_rect	func.c	/^static Delta_rect get_pointer_delta_rect(Client *c, const Move_info *m, Pointer_act act)$/;"	f	typeref:typename:Delta_rect	file:
 get_prefer_resize	hint.c	/^bool get_prefer_resize(WM *wm, Client *c, XSizeHints *hint, Delta_rect *d)$/;"	f	typeref:typename:bool
 get_prev_client	client.c	/^Client *get_prev_client(WM *wm, Client *c)$/;"	f	typeref:typename:Client *
+get_prop	misc.c	/^unsigned char *get_prop(WM *wm, Window win, Atom prop, unsigned long *n)$/;"	f	typeref:typename:unsigned char *
 get_resize_act	misc.c	/^Pointer_act get_resize_act(Client *c, const Move_info *m)$/;"	f	typeref:typename:Pointer_act
+get_spec_char_num	icon.c	/^static size_t get_spec_char_num(const char *str, int ch)$/;"	f	typeref:typename:size_t	file:
 get_string_size	font.c	/^void get_string_size(WM *wm, XftFont *font, const char *str, unsigned int *w, unsigned int *h)$/;"	f	typeref:typename:void
+get_sub_dirs	icon.c	/^static char **get_sub_dirs(const char *base_dir, const char *theme, const char *context_dir)$/;"	f	typeref:typename:char **	file:
 get_text_prop	font.c	/^char *get_text_prop(WM *wm, Window win, Atom atom)$/;"	f	typeref:typename:char *
 get_title_area_rect	client.c	/^Rect get_title_area_rect(WM *wm, Client *c)$/;"	f	typeref:typename:Rect
 get_transient_for	misc.c	/^Window get_transient_for(WM *wm, Window w)$/;"	f	typeref:typename:Window
@@ -462,10 +492,10 @@ get_typed_clients_n	client.c	/^unsigned int get_typed_clients_n(WM *wm, Area_typ
 get_valid_mask	grab.c	/^static unsigned int get_valid_mask(WM *wm, unsigned int mask)$/;"	f	typeref:typename:unsigned int	file:
 get_valid_move_resize	func.c	/^static bool get_valid_move_resize(WM *wm, Client *c, XSizeHints *hint, Delta_rect *d)$/;"	f	typeref:typename:bool	file:
 get_widget_type	misc.c	/^Widget_type get_widget_type(WM *wm, Window win)$/;"	f	typeref:typename:Widget_type
-get_win_size	menu.c	/^static void get_win_size(WM *wm, Window win, unsigned int *w, unsigned int *h)$/;"	f	typeref:typename:void	file:
 grab_buttons	grab.c	/^void grab_buttons(WM *wm, Client *c)$/;"	f	typeref:typename:void
 grab_keys	grab.c	/^void grab_keys(WM *wm)$/;"	f	typeref:typename:void
 grab_pointer	grab.c	/^bool grab_pointer(WM *wm, Pointer_act act)$/;"	f	typeref:typename:bool
+grep_index_theme	icon.c	/^static char *grep_index_theme(const char *base_dir, const char *theme, const char *key, char *bu/;"	f	typeref:typename:char *	file:
 h	gwm.h	/^    unsigned int n, col, row, w, h; \/\/ 菜單項數量、列數、行數、寬度、高度$/;"	m	struct:menu_tag	typeref:typename:unsigned int
 h	gwm.h	/^    unsigned int w, h, status_area_w; \/\/ win的尺寸、按鈕的尺寸和狀態區域的寬度$/;"	m	struct:taskbar_tag	typeref:typename:unsigned int
 h	gwm.h	/^    unsigned int w, h, title_bar_h, border_w, desktop_mask;$/;"	m	struct:client_tag	typeref:typename:unsigned int
@@ -485,7 +515,7 @@ handle_property_notify	handler.c	/^void handle_property_notify(WM *wm, XEvent *e
 handle_selection_notify	handler.c	/^void handle_selection_notify(WM *wm, XEvent *e)$/;"	f	typeref:typename:void
 handle_unmap_notify	handler.c	/^void handle_unmap_notify(WM *wm, XEvent *e)$/;"	f	typeref:typename:void
 have_rule	client.c	/^static bool have_rule(Rule *r, Client *c)$/;"	f	typeref:typename:bool	file:
-have_same_class_icon_client	client.c	/^static bool have_same_class_icon_client(WM *wm, Client *c)$/;"	f	typeref:typename:bool	file:
+have_same_class_icon_client	icon.c	/^static bool have_same_class_icon_client(WM *wm, Client *c)$/;"	f	typeref:typename:bool	file:
 hint	gwm.h	/^    const wchar_t *hint;$/;"	m	struct:entry_tag	typeref:typename:const wchar_t *
 hint_enter_cmd_center_button	handler.c	/^static void hint_enter_cmd_center_button(WM *wm, Widget_type type)$/;"	f	typeref:typename:void	file:
 hint_enter_taskbar_button	handler.c	/^static void hint_enter_taskbar_button(WM *wm, Widget_type type)$/;"	f	typeref:typename:void	file:
@@ -497,13 +527,16 @@ icccm_atom_tag	gwm.h	/^enum icccm_atom_tag \/\/ icccm規範的標識符$/;"	g
 icccm_atoms	gwm.h	/^    Atom icccm_atoms[ICCCM_ATOMS_N]; \/\/ icccm規範的標識符$/;"	m	struct:wm_tag	typeref:typename:Atom[]
 icon	gwm.h	/^    Icon *icon; \/\/ 圖符信息$/;"	m	struct:client_tag	typeref:typename:Icon *
 icon_area	gwm.h	/^    Window win, buttons[TASKBAR_BUTTON_N], icon_area, status_area;$/;"	m	struct:taskbar_tag	typeref:typename:Window
+icon_dir_info_tag	icon.c	/^struct icon_dir_info_tag$/;"	s	file:
 icon_tag	gwm.h	/^struct icon_tag \/\/ 縮微窗口相關信息$/;"	s
-iconify	client.c	/^void iconify(WM *wm, Client *c)$/;"	f	typeref:typename:void
+iconify	icon.c	/^void iconify(WM *wm, Client *c)$/;"	f	typeref:typename:void
 iconify_all_clients	func.c	/^void iconify_all_clients(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:void
 init_desktop	desktop.c	/^void init_desktop(WM *wm)$/;"	f	typeref:typename:void
 init_wm	init.c	/^void init_wm(WM *wm)$/;"	f	typeref:typename:void
 input_for_entry	entry.c	/^bool input_for_entry(WM *wm, Entry *e, XKeyEvent *ke)$/;"	f	typeref:typename:bool
+is_accessible	icon.c	/^static bool is_accessible(const char *filename)$/;"	f	typeref:typename:bool	file:
 is_chosen_button	misc.c	/^bool is_chosen_button(WM *wm, Widget_type type)$/;"	f	typeref:typename:bool
+is_dir_match_size	icon.c	/^static bool is_dir_match_size(const char *base_dir, const char *theme, const char *sub_dir, int /;"	f	typeref:typename:bool	file:
 is_equal_modifier_mask	grab.c	/^bool is_equal_modifier_mask(WM *wm, unsigned int m1, unsigned int m2)$/;"	f	typeref:typename:bool
 is_func_click	handler.c	/^static bool is_func_click(WM *wm, Widget_type type, Buttonbind *b, XEvent *e)$/;"	f	typeref:typename:bool	file:
 is_layout_adjust_area	layout.c	/^bool is_layout_adjust_area(WM *wm, Window win, int x)$/;"	f	typeref:typename:bool
@@ -528,11 +561,15 @@ layout	gwm.h	/^    Layout layout; \/\/ 窗口布局模式$/;"	m	union:func_arg_t
 layout_tag	gwm.h	/^enum layout_tag \/\/ 窗口管理器的布局模式$/;"	g
 load_font	font.c	/^void load_font(WM *wm)$/;"	f	typeref:typename:void
 look_up_key	misc.c	/^KeySym look_up_key(XIC xic, XKeyEvent *e, wchar_t *keyname, size_t n)$/;"	f	typeref:typename:KeySym
+lookup_fallback_icon	icon.c	/^static char *lookup_fallback_icon(const char *name, char *const *base_dirs)$/;"	f	typeref:typename:char *	file:
+lookup_icon	icon.c	/^static char *lookup_icon(const char *name, int size, int scale, char *const *base_dirs, const ch/;"	f	typeref:typename:char *	file:
 main	gwm.c	/^int main(int argc, char *argv[])$/;"	f	typeref:typename:int
 main_area_ratio	gwm.h	/^    double main_area_ratio, fixed_area_ratio; \/\/ 分別爲主要和固定區域屏佔比$/;"	m	struct:desktop_tag	typeref:typename:double
 malloc_s	misc.c	/^void *malloc_s(size_t size)$/;"	f	typeref:typename:void *
+max_size	icon.c	/^    int size, scale, max_size, min_size, threshold;$/;"	m	struct:icon_dir_info_tag	typeref:typename:int	file:
 maximize_client	func.c	/^void maximize_client(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:void
 menu_tag	gwm.h	/^struct menu_tag \/\/ 一級多行多列菜單 $/;"	s
+min_size	icon.c	/^    int size, scale, max_size, min_size, threshold;$/;"	m	struct:icon_dir_info_tag	typeref:typename:int	file:
 mod_map	gwm.h	/^	XModifierKeymap *mod_map; \/\/ 功能轉換鍵映射$/;"	m	struct:wm_tag	typeref:typename:XModifierKeymap *
 modifier	gwm.h	/^	unsigned int modifier; \/\/ 要綁定的鍵盤功能轉換鍵 $/;"	m	struct:buttonbind_tag	typeref:typename:unsigned int
 modifier	gwm.h	/^	unsigned int modifier; \/\/ 要綁定的鍵盤功能轉換鍵$/;"	m	struct:keybind_tag	typeref:typename:unsigned int
@@ -550,6 +587,7 @@ next_desktop	func.c	/^void next_desktop(WM *wm, XEvent *e, Func_arg arg)$/;"	f	t
 nx	gwm.h	/^    int ox, oy, nx, ny; \/* 分別爲定位器舊、新坐標 *\/$/;"	m	struct:move_info_tag	typeref:typename:int
 ny	gwm.h	/^    int ox, oy, nx, ny; \/* 分別爲定位器舊、新坐標 *\/$/;"	m	struct:move_info_tag	typeref:typename:int
 open_cmd_center	func.c	/^void open_cmd_center(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:void
+open_index_theme	icon.c	/^static FILE *open_index_theme(const char *base_dir, const char *theme)$/;"	f	typeref:typename:FILE *	file:
 ox	gwm.h	/^    int ox, oy, nx, ny; \/* 分別爲定位器舊、新坐標 *\/$/;"	m	struct:move_info_tag	typeref:typename:int
 oy	gwm.h	/^    int ox, oy, nx, ny; \/* 分別爲定位器舊、新坐標 *\/$/;"	m	struct:move_info_tag	typeref:typename:int
 paste_for_entry	entry.c	/^void paste_for_entry(WM *wm, Entry *e)$/;"	f	typeref:typename:void
@@ -575,6 +613,7 @@ row	gwm.h	/^    unsigned int n, col, row, w, h; \/\/ 菜單項數量、列數、
 rule_tag	gwm.h	/^struct rule_tag \/\/ 窗口管理器的規則$/;"	s
 run_cmd	gwm.h	/^    Entry run_cmd; \/\/ 輸入命令並執行的構件$/;"	m	struct:wm_tag	typeref:typename:Entry
 run_flag	gwm.c	/^sig_atomic_t run_flag=1;$/;"	v	typeref:typename:sig_atomic_t
+scale	icon.c	/^    int size, scale, max_size, min_size, threshold;$/;"	m	struct:icon_dir_info_tag	typeref:typename:int	file:
 screen	gwm.h	/^    int screen; \/\/ 屏幕$/;"	m	struct:wm_tag	typeref:typename:int
 screen_height	gwm.h	/^    unsigned int screen_width, screen_height; \/\/ 屏幕寬度、高度$/;"	m	struct:wm_tag	typeref:typename:unsigned int
 screen_width	gwm.h	/^    unsigned int screen_width, screen_height; \/\/ 屏幕寬度、高度$/;"	m	struct:wm_tag	typeref:typename:unsigned int
@@ -594,6 +633,7 @@ set_xic	misc.c	/^void set_xic(WM *wm, Window win, XIC *ic)$/;"	f	typeref:typenam
 should_fix_win_rect	layout.c	/^static bool should_fix_win_rect(WM *wm, Client *c)$/;"	f	typeref:typename:bool	file:
 show_entry	entry.c	/^void show_entry(WM *wm, Entry *e)$/;"	f	typeref:typename:void
 show_menu	menu.c	/^void show_menu(WM *wm, XEvent *e, Menu *menu, Window bind)$/;"	f	typeref:typename:void
+size	icon.c	/^    int size, scale, max_size, min_size, threshold;$/;"	m	struct:icon_dir_info_tag	typeref:typename:int	file:
 status_area	gwm.h	/^    Window win, buttons[TASKBAR_BUTTON_N], icon_area, status_area;$/;"	m	struct:taskbar_tag	typeref:typename:Window
 status_area_w	gwm.h	/^    unsigned int w, h, status_area_w; \/\/ win的尺寸、按鈕的尺寸和狀態區域的寬度$/;"	m	struct:taskbar_tag	typeref:typename:unsigned int
 status_text	gwm.h	/^    char *status_text; \/\/ 狀態區域要顯示的文字$/;"	m	struct:taskbar_tag	typeref:typename:char *
@@ -604,6 +644,7 @@ taskbar_tag	gwm.h	/^struct taskbar_tag \/\/ 窗口管理器的任務欄$/;"	s
 text	gwm.h	/^    wchar_t text[BUFSIZ];$/;"	m	struct:entry_tag	typeref:typename:wchar_t[]
 text_color	gwm.h	/^    XftColor text_color[TEXT_COLOR_N]; \/\/ 文本顏色$/;"	m	struct:wm_tag	typeref:typename:XftColor[]
 text_color_tag	gwm.h	/^enum text_color_tag \/\/ 文本顏色類型$/;"	g
+threshold	icon.c	/^    int size, scale, max_size, min_size, threshold;$/;"	m	struct:icon_dir_info_tag	typeref:typename:int	file:
 title_area	gwm.h	/^    Window win, frame, title_area, buttons[TITLE_BUTTON_N];$/;"	m	struct:client_tag	typeref:typename:Window
 title_bar_h	gwm.h	/^    unsigned int title_bar_h, border_w, desktop_mask; \/\/ 客戶窗口標題欄高度和邊框寬/;"	m	struct:rule_tag	typeref:typename:unsigned int
 title_bar_h	gwm.h	/^    unsigned int w, h, title_bar_h, border_w, desktop_mask;$/;"	m	struct:client_tag	typeref:typename:unsigned int
@@ -612,13 +653,14 @@ title_text	gwm.h	/^    char *title_text; \/\/ 縮微窗口標題文字，即XA_W
 toggle_border_visibility	func.c	/^void toggle_border_visibility(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:void
 toggle_focus_mode	func.c	/^void toggle_focus_mode(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:void
 toggle_title_bar_visibility	func.c	/^void toggle_title_bar_visibility(WM *wm, XEvent *e, Func_arg arg)$/;"	f	typeref:typename:void
+type	icon.c	/^    char type[10]; \/\/ char context[32]; 目前用不上$/;"	m	struct:icon_dir_info_tag	typeref:typename:char[10]	file:
 update_client_look	client.c	/^void update_client_look(WM *wm, unsigned int desktop_n, Client *c)$/;"	f	typeref:typename:void
 update_cmd_center_button_text	handler.c	/^static void update_cmd_center_button_text(WM *wm, size_t index)$/;"	f	typeref:typename:void	file:
 update_entry_text	entry.c	/^void update_entry_text(WM *wm, Entry *e)$/;"	f	typeref:typename:void
 update_focus_client_pointer	client.c	/^static void update_focus_client_pointer(WM *wm, unsigned int desktop_n, Client *c)$/;"	f	typeref:typename:void	file:
 update_frame	client.c	/^void update_frame(WM *wm, unsigned int desktop_n, Client *c)$/;"	f	typeref:typename:void
 update_frame_prop	client.c	/^void update_frame_prop(WM *wm, Client *c)$/;"	f	typeref:typename:void
-update_icon_area	client.c	/^void update_icon_area(WM *wm)$/;"	f	typeref:typename:void
+update_icon_area	icon.c	/^void update_icon_area(WM *wm)$/;"	f	typeref:typename:void
 update_icon_text	handler.c	/^static void update_icon_text(WM *wm, Window win)$/;"	f	typeref:typename:void	file:
 update_layout	layout.c	/^void update_layout(WM *wm)$/;"	f	typeref:typename:void
 update_resize_win	func.c	/^static void update_resize_win(WM *wm, Client *c, XSizeHints *hint)$/;"	f	typeref:typename:void	file:
