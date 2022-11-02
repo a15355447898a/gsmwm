@@ -73,6 +73,8 @@ Widget_type get_widget_type(WM *wm, Window win)
         return ROOT_WIN;
     if(win == wm->run_cmd.win)
         return RUN_CMD_ENTRY;
+    if(win == wm->hint_win)
+        return HINT_WIN;
     for(type=TASKBAR_BUTTON_BEGIN; type<=TASKBAR_BUTTON_END; type++)
         if(win == wm->taskbar.buttons[TASKBAR_BUTTON_INDEX(type)])
             return type;
@@ -200,13 +202,16 @@ void set_override_redirect(WM *wm, Window win)
 
 void clear_wm(WM *wm)
 {
-    for(Client *next=NULL, *c=wm->clients->next; c!=wm->clients; c=next)
-        next=c->next, free_client(wm, c);
+    for(Client *c=wm->clients->next; c!=wm->clients; c=c->next)
+    {
+        XReparentWindow(wm->display, c->win, wm->root_win, c->x, c->y);
+        del_client(wm, c, false);
+    }
     XDestroyWindow(wm->display, wm->taskbar.win);
     free(wm->taskbar.status_text);
     XDestroyWindow(wm->display, wm->cmd_center.win);
     XDestroyWindow(wm->display, wm->run_cmd.win);
-    XDestroyWindow(wm->display, wm->resize_win);
+    XDestroyWindow(wm->display, wm->hint_win);
     XFreeModifiermap(wm->mod_map);
     for(size_t i=0; i<POINTER_ACT_N; i++)
         XFreeCursor(wm->display, wm->cursors[i]);
@@ -254,4 +259,46 @@ char *copy_strings(const char *s, ...) // 調用時須以NULL結尾
         strcat(result, p);
     va_end(ap);
     return result;
+}
+
+/* 坐標均對於根窗口, 後四個參數是將要彈出的窗口的坐標和尺寸 */
+void set_pos_for_click(WM *wm, Window click, int cx, int cy, int *px, int *py, unsigned int pw, unsigned int ph)
+{
+    unsigned int cw, ch, sw=wm->screen_width, sh=wm->screen_height;
+
+    get_drawable_size(wm, click, &cw, &ch);
+
+    if(cx < 0) // 窗口click左邊出屏
+        cw=cx+pw, cx=0;
+    if(cx+cw > sw) // 窗口click右邊出屏
+        cw=sw-cx;
+
+    if(cx+pw <= sw) // 在窗口click的右邊能顯示完整的菜單
+        *px=cx;
+    else if(cx+cw >= pw) // 在窗口click的左邊能顯示完整的菜單
+        *px=cx+cw-pw;
+    else if(cx+cw/2 <= sw/2) // 窗口click在屏幕的左半部
+        *px=sw-pw;
+    else // 窗口click在屏幕的右半部
+        *px=0;
+
+    if(cy+ch+ph <= sh) // 在窗口click下能顯示完整的菜單
+        *py=cy+ch;
+    else if(cy >= ph) // 在窗口click上能顯示完整的菜單
+        *py=cy-ph;
+    else if(cy+ch/2 <= sh/2) // 窗口click在屏幕的上半部
+        *py=sh-ph;
+    else // 窗口click在屏幕的下半部
+        *py=0;
+}
+
+bool is_win_exist(WM *wm, Window win, Window parent)
+{
+    Window root, pwin, *child=NULL;
+    unsigned int n;
+    if(XQueryTree(wm->display, parent, &root, &pwin, &child, &n))
+        for(size_t i=0; i<n; i++)
+            if(win == child[i])
+                { XFree(child); return true; }
+    return false;
 }

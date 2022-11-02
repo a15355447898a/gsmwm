@@ -9,6 +9,7 @@
  * <http://www.gnu.org/licenses/>。
  * ************************************************************************/
 
+#include <time.h>
 #include "gwm.h"
 #include "handler.h"
 #include "client.h"
@@ -16,16 +17,28 @@
 #include "font.h"
 #include "func.h"
 #include "grab.h"
+#include "hint.h"
+#include "icon.h"
 #include "layout.h"
 #include "misc.h"
 
+static void handle_button_press(WM *wm, XEvent *e);
+static void handle_config_request(WM *wm, XEvent *e);
+static void handle_enter_notify(WM *wm, XEvent *e);
+static void handle_pointer_hovers(WM *wm, Window hover, Widget_type type);
+static void handle_pointer_hover(WM *wm, Window hover, void (*handler)(WM *, Window));
+static void update_hint_win_for_icon(WM *wm, Window hover);
+static void handle_expose(WM *wm, XEvent *e);
+static void handle_key_press(WM *wm, XEvent *e);
+static void handle_leave_notify(WM *wm, XEvent *e);
+static void handle_map_request(WM *wm, XEvent *e);
+static void handle_unmap_notify(WM *wm, XEvent *e);
+static void handle_property_notify(WM *wm, XEvent *e);
+static void handle_selection_notify(WM *wm, XEvent *e);
 static bool is_func_click(WM *wm, Widget_type type, Buttonbind *b, XEvent *e);
 static void focus_clicked_client(WM *wm, Window win);
 static void config_managed_client(WM *wm, Client *c);
 static void config_unmanaged_win(WM *wm, XConfigureRequestEvent *e);
-static void hint_enter_taskbar_button(WM *wm, Widget_type type);
-static void hint_enter_cmd_center_button(WM *wm, Widget_type type);
-static void hint_enter_title_button(WM *wm, Client *c, Widget_type type);
 static void update_icon_text(WM *wm, Window win);
 static void update_taskbar_button_text(WM *wm, size_t index);
 static void update_cmd_center_button_text(WM *wm, size_t index);
@@ -34,8 +47,12 @@ static void update_title_button_text(WM *wm, Client *c, size_t index);
 static void update_status_area_text(WM *wm);
 static void key_run_cmd(WM *wm, XKeyEvent *e);
 static void hint_leave_taskbar_button(WM *wm, Widget_type type);
-static void hint_leave_cmd_center_button(WM *wm, Widget_type type);
 static void hint_leave_title_button(WM *wm, Client *c, Widget_type type);
+static void update_status_area(WM *wm);
+static void handle_wm_hints_notify(WM *wm, Client *c, Window win);
+static void handle_wm_icon_name_notify(WM *wm, Client *c, Window win);
+static void handle_wm_name_notify(WM *wm, Client *c, Window win);
+static void handle_wm_normal_hints_notify(WM *wm, Client *c, Window win);
 
 void handle_events(WM *wm)
 {
@@ -65,7 +82,7 @@ void handle_event(WM *wm, XEvent *e)
         event_handlers[e->type](wm, e);
 }
 
-void handle_button_press(WM *wm, XEvent *e)
+static void handle_button_press(WM *wm, XEvent *e)
 {
     Buttonbind *b=BUTTONBIND;
     Widget_type type=get_widget_type(wm, e->xbutton.window);
@@ -99,7 +116,7 @@ static void focus_clicked_client(WM *wm, Window win)
         focus_client(wm, wm->cur_desktop, c);
 }
 
-void handle_config_request(WM *wm, XEvent *e)
+static void handle_config_request(WM *wm, XEvent *e)
 {
     XConfigureRequestEvent cr=e->xconfigurerequest;
     Client *c=win_to_client(wm, cr.window);
@@ -131,12 +148,12 @@ static void config_unmanaged_win(WM *wm, XConfigureRequestEvent *e)
     XConfigureWindow(wm->display, e->window, e->value_mask, &wc);
 }
 
-void handle_enter_notify(WM *wm, XEvent *e)
+static void handle_enter_notify(WM *wm, XEvent *e)
 {
     int x=e->xcrossing.x_root, y=e->xcrossing.y_root;
     Window win=e->xcrossing.window;
-    Client *c=win_to_client(wm, win);
     Widget_type type=get_widget_type(wm, win);
+    Client *c=win_to_client(wm, win);
     Pointer_act act=NO_OP;
     Move_info m={x, y, 0, 0};
 
@@ -145,41 +162,84 @@ void handle_enter_notify(WM *wm, XEvent *e)
     if(is_layout_adjust_area(wm, win, x))
         act=ADJUST_LAYOUT_RATIO;
     else if(IS_TASKBAR_BUTTON(type))
-        hint_enter_taskbar_button(wm, type);
+        update_win_background(wm, win,
+            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel);
+    else if(type == CLIENT_ICON)
+        update_win_background(wm, win,
+            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel);
     else if(IS_CMD_CENTER_ITEM(type))
-        hint_enter_cmd_center_button(wm, type);
+        update_win_background(wm, win,
+            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel);
     else if(type == CLIENT_FRAME)
         act=get_resize_act(c, &m);
     else if(type == TITLE_AREA)
         act=MOVE;
     else if(IS_TITLE_BUTTON(type))
-        hint_enter_title_button(wm, c, type);
+        update_win_background(wm, win, type==CLOSE_BUTTON ?
+            wm->widget_color[ENTERED_CLOSE_BUTTON_COLOR].pixel :
+            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel);
     XDefineCursor(wm->display, win, wm->cursors[act]);
+    handle_pointer_hovers(wm, win, type);
 }
 
-static void hint_enter_taskbar_button(WM *wm, Widget_type type)
+static void handle_pointer_hovers(WM *wm, Window hover, Widget_type type)
 {
-    unsigned long color=wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel;
-    Window win=wm->taskbar.buttons[TASKBAR_BUTTON_INDEX(type)];
-    update_win_background(wm, win, color);
+    if(type == CLIENT_ICON)
+        handle_pointer_hover(wm, hover, update_hint_win_for_icon);
 }
 
-static void hint_enter_cmd_center_button(WM *wm, Widget_type type)
+static void handle_pointer_hover(WM *wm, Window hover, void (*handler)(WM *, Window))
 {
-    unsigned long color=wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel;
-    Window win=wm->cmd_center.items[CMD_CENTER_ITEM_INDEX(type)];
-    update_win_background(wm, win, color);
+    XEvent ev;
+    bool pause=false;
+    unsigned int diff_time; // 單位爲分秒，即十分之一秒
+    clock_t last_time=clock();
+    while(1)
+    {
+        if(XCheckMaskEvent(wm->display, ROOT_EVENT_MASK|PointerMotionMask, &ev))
+        {
+            handle_event(wm, &ev);
+            if(ev.type == MotionNotify && ev.xmotion.window==hover)
+            {
+                last_time=clock();
+                XUnmapWindow(wm->display, wm->hint_win);
+                pause=false;
+            }
+            else if(ev.type==LeaveNotify && ev.xcrossing.window==hover)
+            {
+                XUnmapWindow(wm->display, wm->hint_win);
+                break;
+            }
+        }
+        diff_time=10*(clock()-last_time)/CLOCKS_PER_SEC;
+        if(!pause && diff_time>=HOVER_TIME)
+            handler(wm, hover), pause=true;
+    }
 }
 
-static void hint_enter_title_button(WM *wm, Client *c, Widget_type type)
+static void update_hint_win_for_icon(WM *wm, Window hover)
 {
-    unsigned long ccolor=wm->widget_color[ENTERED_CLOSE_BUTTON_COLOR].pixel,
-                  ncolor=wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel;
-    Window win=c->buttons[TITLE_BUTTON_INDEX(type)];
-    update_win_background(wm, win, type==CLOSE_BUTTON ? ccolor : ncolor);
+    Client *c=win_to_iconic_state_client(wm, hover);
+    if(c)
+    {
+        Window root, child;
+        unsigned int cw, tw, mask, h=HINT_WIN_HEIGHT;
+        int x=c->icon->x+c->icon->w, y=c->icon->y+c->icon->h, rx, ry, wx, wy;
+        get_string_size(wm, wm->font[HINT_FONT], c->class_name, &cw, NULL);
+        get_string_size(wm, wm->font[HINT_FONT], c->icon->title_text, &tw, NULL);
+        if(XQueryPointer(wm->display, hover, &root, &child, &rx, &ry, &wx, &wy, &mask))
+            set_pos_for_click(wm, hover, rx, ry, &x, &y, cw+tw, h);
+        XMoveResizeWindow(wm->display, wm->hint_win, x, y, cw+tw, h);
+        XMapRaised(wm->display, wm->hint_win);
+        String_format f={{0, 0, cw, HINT_WIN_HEIGHT}, CENTER,
+            false, 0, wm->text_color[CLASS_TEXT_COLOR], HINT_FONT};
+        draw_string(wm, wm->hint_win, c->class_name, &f);
+        f.r.x=cw, f.r.w=tw, f.fg=wm->text_color[TITLE_TEXT_COLOR];
+        draw_string(wm, wm->hint_win, c->icon->title_text, &f);
+    }
 }
 
-void handle_expose(WM *wm, XEvent *e)
+static void handle_expose(WM *wm, XEvent *e)
 {
     if(e->xexpose.count)
         return;
@@ -207,17 +267,13 @@ static void update_icon_text(WM *wm, Window win)
     Client *c=win_to_iconic_state_client(wm, win);
     if(c)
     {
-        unsigned int w;
         Icon *i=c->icon;
-        get_string_size(wm, wm->font[ICON_CLASS_FONT], c->class_name, &w, NULL);
-        String_format f={{ICON_SIZE, 0, w, i->h}, CENTER, false, 0,
-            wm->text_color[ICON_CLASS_TEXT_COLOR], ICON_CLASS_FONT};
-        draw_string(wm, i->win, c->class_name, &f);
-        if(!i->is_short_text && (w+=ICON_SIZE)<ICON_WIN_WIDTH_MAX)
+        unsigned int w=get_icon_draw_width(wm, c);
+        draw_icon(wm, c);
+        if(!i->is_short_text)
         {
-            String_format f={{w, 0, MIN(i->w, ICON_WIN_WIDTH_MAX)-w, i->h},
-                CENTER_LEFT, false, 0,
-                wm->text_color[ICON_TITLE_TEXT_COLOR], ICON_TITLE_FONT};
+            String_format f={{w, 0, i->w, i->h}, CENTER_LEFT, false, 0,
+                wm->text_color[TITLE_TEXT_COLOR], TITLE_FONT};
             draw_string(wm, i->win, i->title_text, &f);
         }
     }
@@ -268,7 +324,7 @@ static void update_status_area_text(WM *wm)
     draw_string(wm, b->status_area, b->status_text, &f);
 }
 
-void handle_key_press(WM *wm, XEvent *e)
+static void handle_key_press(WM *wm, XEvent *e)
 {
     if(e->xkey.window == wm->run_cmd.win)
         key_run_cmd(wm, &e->xkey);
@@ -299,17 +355,18 @@ static void key_run_cmd(WM *wm, XKeyEvent *e)
     }
 }
 
-void handle_leave_notify(WM *wm, XEvent *e)
+static void handle_leave_notify(WM *wm, XEvent *e)
 {
     Window win=e->xcrossing.window;
     Widget_type type=get_widget_type(wm, win);
     if(IS_TASKBAR_BUTTON(type))
         hint_leave_taskbar_button(wm, type);
+    else if(type == CLIENT_ICON)
+        update_win_background(wm, win, wm->widget_color[ICON_AREA_COLOR].pixel);
     else if(IS_CMD_CENTER_ITEM(type))
-        hint_leave_cmd_center_button(wm, type);
+        update_win_background(wm, win, wm->widget_color[CMD_CENTER_COLOR].pixel);
     else if(IS_TITLE_BUTTON(type))
         hint_leave_title_button(wm, win_to_client(wm, win), type);
-    XDefineCursor(wm->display, win, wm->cursors[NO_OP]);
 }
 
 static void hint_leave_taskbar_button(WM *wm, Widget_type type)
@@ -321,12 +378,6 @@ static void hint_leave_taskbar_button(WM *wm, Widget_type type)
     update_win_background(wm, win, color);
 }
 
-static void hint_leave_cmd_center_button(WM *wm, Widget_type type)
-{
-    Window win=wm->cmd_center.items[CMD_CENTER_ITEM_INDEX(type)];
-    update_win_background(wm, win, wm->widget_color[CMD_CENTER_COLOR].pixel);
-}
-
 static void hint_leave_title_button(WM *wm, Client *c, Widget_type type)
 {
     Window win=c->buttons[TITLE_BUTTON_INDEX(type)];
@@ -335,7 +386,7 @@ static void hint_leave_title_button(WM *wm, Client *c, Widget_type type)
         wm->widget_color[NORMAL_TITLE_BUTTON_COLOR].pixel);
 }
 
-void handle_map_request(WM *wm, XEvent *e)
+static void handle_map_request(WM *wm, XEvent *e)
 {
     Window win=e->xmaprequest.window;
     XMapWindow(wm->display, win);
@@ -359,7 +410,7 @@ void handle_map_request(WM *wm, XEvent *e)
  * 原父窗口。銷毀窗口產生UnmapNotify事件時，xunmap.event等於新父窗口。若通
  * 過SendEvent請求來產生UnmapNotify事件（此時xunmap.send_event的值爲true）
  * ，xunmap.event就有可能是原父窗口、新父窗口、根窗口，等等。*/
-void handle_unmap_notify(WM *wm, XEvent *e)
+static void handle_unmap_notify(WM *wm, XEvent *e)
 {
     XUnmapEvent *ue=&e->xunmap;
     Client *c=win_to_client(wm, ue->window);
@@ -367,47 +418,101 @@ void handle_unmap_notify(WM *wm, XEvent *e)
     if( c && ue->window==c->win
         && (ue->send_event || ue->event==c->frame || ue->event==c->win))
     {
-        XUnmapWindow(wm->display, c->frame);
-        del_client(wm, c);
+        del_client(wm, c, true);
         update_layout(wm);
     }
 }
 
-void handle_property_notify(WM *wm, XEvent *e)
+static void handle_property_notify(WM *wm, XEvent *e)
 {
     Window win=e->xproperty.window;
-    char *s;
-    if(e->xproperty.atom==XA_WM_NAME && (s=get_text_prop(wm, win, XA_WM_NAME)))
+    Client *c=win_to_client(wm, win);
+#if SET_FRAME_PROP
+    if(c)
+        update_frame_prop(wm, c);
+#endif
+    switch(e->xproperty.atom)
     {
-        Client *c;
-        if((c=win_to_client(wm, win)) && win==c->win)
+        case XA_WM_HINTS:
+            handle_wm_hints_notify(wm, c, win); break;
+        case XA_WM_ICON_NAME:
+            handle_wm_icon_name_notify(wm, c, win); break;
+        case XA_WM_NAME:
+            handle_wm_name_notify(wm, c, win); break;
+        case XA_WM_NORMAL_HINTS:
+            handle_wm_normal_hints_notify(wm, c, win); break;
+        default: break; // 或許其他的情況也應考慮，但暫時還沒遇到必要的情況
+    }
+}
+
+static void handle_wm_hints_notify(WM *wm, Client *c, Window win)
+{
+    XWMHints *hint=XGetWMHints(wm->display, win);
+    if(c && c->win==win && hint)
+        XFree(c->wm_hint), c->wm_hint=hint;
+    set_input_focus(wm, hint, win);
+}
+
+static void handle_wm_icon_name_notify(WM *wm, Client *c, Window win)
+{
+    if(c && c->win==win && c->area_type==ICONIFY_AREA)
+    {
+        free(c->icon->title_text);
+        c->icon->title_text=get_text_prop(wm, c->win, XA_WM_ICON_NAME);
+        update_icon_area(wm);
+    }
+}
+
+static void handle_wm_name_notify(WM *wm, Client *c, Window win)
+{
+    char *s=get_text_prop(wm, win, XA_WM_NAME);
+    if(s)
+    {
+        if(c && c->win==win)
         {
             free(c->title_text);
             c->title_text=s;
             update_title_area_text(wm, c);
-            update_frame_prop(wm, c);
         }
         else if(win == wm->root_win)
         {
-            unsigned int w, bw=TASKBAR_BUTTON_WIDTH*TASKBAR_BUTTON_N;
-            Taskbar *b=&wm->taskbar;
-            free(b->status_text);
-            get_string_size(wm, wm->font[STATUS_AREA_FONT], s, &w, NULL);
-            if(w > STATUS_AREA_WIDTH_MAX)
-                w=STATUS_AREA_WIDTH_MAX;
-            if(w != b->status_area_w)
-            {
-                XMoveResizeWindow(wm->display, b->status_area, b->w-w, 0, w, b->h);
-                XMoveResizeWindow(wm->display, b->icon_area, bw, 0, b->w-bw-w, b->h);
-            }
-            b->status_text=s;
-            b->status_area_w=w;
-            update_status_area_text(wm);
+            free(wm->taskbar.status_text);
+            wm->taskbar.status_text=s;
+            update_status_area(wm);
         }
     }
 }
 
-void handle_selection_notify(WM *wm, XEvent *e)
+static void update_status_area(WM *wm)
+{
+    unsigned int w, bw=TASKBAR_BUTTON_WIDTH*TASKBAR_BUTTON_N;
+    Taskbar *b=&wm->taskbar;
+    get_string_size(wm, wm->font[STATUS_AREA_FONT], b->status_text, &w, NULL);
+    if(w > STATUS_AREA_WIDTH_MAX)
+        w=STATUS_AREA_WIDTH_MAX;
+    if(w != b->status_area_w)
+    {
+        XMoveResizeWindow(wm->display, b->status_area, b->w-w, 0, w, b->h);
+        XMoveResizeWindow(wm->display, b->icon_area, bw, 0, b->w-bw-w, b->h);
+    }
+    b->status_area_w=w;
+    update_status_area_text(wm);
+}
+
+static void handle_wm_normal_hints_notify(WM *wm, Client *c, Window win)
+{
+    if(c && c->win==win)
+    {
+        update_size_hint(wm, c);
+        if(c->area_type == FLOATING_AREA)
+        {
+            set_default_rect(wm, c);
+            move_resize_client(wm, c, NULL);
+        }
+    }
+}
+
+static void handle_selection_notify(WM *wm, XEvent *e)
 {
     Window win=e->xselection.requestor;
     if(e->xselection.property==wm->utf8 && win==wm->run_cmd.win)

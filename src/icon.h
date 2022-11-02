@@ -14,6 +14,8 @@
 
 void iconify(WM *wm, Client *c);
 void update_icon_area(WM *wm);
+unsigned int get_icon_draw_width(WM *wm, Client *c);
+void draw_icon(WM *wm, Client *c);
 void deiconify(WM *wm, Client *c);
 void del_icon(WM *wm, Client *c);
 

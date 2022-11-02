@@ -21,20 +21,23 @@
 
 static void apply_rules(WM *wm, Client *c);
 static bool have_rule(Rule *r, Client *c);
-static void set_default_pos(WM *wm, Client *c, XSizeHints *hint, XWindowAttributes *a);
-static void set_default_size(WM *wm, Client *c, XSizeHints *hint, XWindowAttributes *a);
+static void set_default_pos(WM *wm, Client *c, XWindowAttributes *a);
+static void set_default_size(WM *wm, Client *c, XWindowAttributes *a);
 static void frame_client(WM *wm, Client *c);
 static Rect get_button_rect(Client *c, size_t index);
 static Rect get_frame_rect(Client *c);
 static void update_focus_client_pointer(WM *wm, unsigned int desktop_n, Client *c);
 static bool is_normal_client(WM *wm, unsigned int desktop_n, Client *c);
+static void update_client_look(WM *wm, unsigned int desktop_n, Client *c);
 static bool move_client_node(WM *wm, Client *from, Client *to, Area_type type);
 
 void add_client(WM *wm, Window win)
 {
     Client *c=malloc_s(sizeof(Client));
+    memset(c, 0, sizeof(Client));
     c->win=win;
     c->title_text=get_text_prop(wm, win, XA_WM_NAME);
+    update_size_hint(wm, c);
     apply_rules(wm, c);
     add_client_node(get_area_head(wm, c->area_type), c);
     fix_area_type(wm);
@@ -86,9 +89,10 @@ static void apply_rules(WM *wm, Client *c)
 
 static bool have_rule(Rule *r, Client *c)
 {
-    const char *pc=r->app_class, *pn=r->app_name;
-    return ((pc && (strstr(c->class_hint.res_class, pc) || strcmp(pc, "*")==0))
-        || ((pn && (strstr(c->class_hint.res_name, pn) || strcmp(pc, "*")==0))));
+    const char *pc=r->app_class, *pn=r->app_name,
+        *class=c->class_hint.res_class, *name=c->class_hint.res_name;
+    return ((pc && ((class && strstr(class, pc)) || strcmp(pc, "*")==0))
+        || ((pn && ((name && strstr(name, pn)) || strcmp(pc, "*")==0))));
 }
 
 void add_client_node(Client *head, Client *c)
@@ -117,17 +121,17 @@ void fix_area_type(WM *wm)
 
 void set_default_rect(WM *wm, Client *c)
 {
-    XSizeHints hint=get_fixed_size_hint(wm, c);
     XWindowAttributes a={0, 0, wm->screen_width/4, wm->screen_height/4};
     XGetWindowAttributes(wm->display, c->win, &a);
-    set_default_size(wm, c, &hint, &a);
-    set_default_pos(wm, c, &hint, &a);
+    set_default_size(wm, c, &a);
+    set_default_pos(wm, c, &a);
 }
 
-static void set_default_pos(WM *wm, Client *c, XSizeHints *hint, XWindowAttributes *a)
+static void set_default_pos(WM *wm, Client *c, XWindowAttributes *a)
 {
-    c->x=hint->x, c->y=hint->y;
-    if(!(hint->flags & USPosition) && !(hint->flags & PPosition))
+    XSizeHints *p=&c->size_hint;
+    c->x=p->x, c->y=p->y;
+    if(!(p->flags & USPosition) && !(p->flags & PPosition))
         c->x=a->x, c->y=a->y;
     if(c->x>0 && c->x>=wm->screen_width)
         c->x=wm->screen_width-c->w+2*c->border_w;
@@ -139,25 +143,26 @@ static void set_default_pos(WM *wm, Client *c, XSizeHints *hint, XWindowAttribut
         c->y=c->border_w+c->title_bar_h;
 }
 
-static void set_default_size(WM *wm, Client *c, XSizeHints *hint, XWindowAttributes *a)
+static void set_default_size(WM *wm, Client *c, XWindowAttributes *a)
 {
-    c->w=hint->width, c->h=hint->height;
-    SET_DEF_VAL(c->w, hint->base_width), SET_DEF_VAL(c->h, hint->base_height);
-    c->w=hint->base_width+get_client_col(wm, c, hint)*hint->width_inc;
-    c->h=hint->base_height+get_client_row(wm, c, hint)*hint->height_inc;
+    XSizeHints *p=&c->size_hint;
+    c->w=p->width, c->h=p->height;
+    SET_DEF_VAL(c->w, p->base_width), SET_DEF_VAL(c->h, p->base_height);
+    c->w=p->base_width+get_client_col(wm, c)*p->width_inc;
+    c->h=p->base_height+get_client_row(wm, c)*p->height_inc;
     SET_DEF_VAL(c->w, a->width), SET_DEF_VAL(c->h, a->height);
-    if(hint->min_width && c->w<hint->min_width)
-        c->w=hint->min_width;
-    if(hint->min_height && c->h<hint->min_height)
-        c->h=hint->min_height;
-    if(hint->max_width && c->w>hint->max_width)
-        c->w=hint->max_width;
-    if(hint->max_height && c->h>hint->max_height)
-        c->h=hint->max_height;
-    if(hint->min_aspect.x && hint->min_aspect.y)
+    if(p->min_width && c->w<p->min_width)
+        c->w=p->min_width;
+    if(p->min_height && c->h<p->min_height)
+        c->h=p->min_height;
+    if(p->max_width && c->w>p->max_width)
+        c->w=p->max_width;
+    if(p->max_height && c->h>p->max_height)
+        c->h=p->max_height;
+    if(p->min_aspect.x && p->min_aspect.y)
     {
-        float mina=(float)hint->min_aspect.x/hint->min_aspect.y,
-              maxa=(float)hint->max_aspect.x/hint->max_aspect.y;
+        float mina=(float)p->min_aspect.x/p->min_aspect.y,
+              maxa=(float)p->max_aspect.x/p->max_aspect.y;
         if((float)c->w/c->h < mina)
             c->h=c->w*mina+0.5;
         else if((float)c->w/c->h > maxa)
@@ -182,7 +187,6 @@ static void frame_client(WM *wm, Client *c)
 
 void update_frame_prop(WM *wm, Client *c)
 {
-#if SET_FRAME_PROP
     int n=0;
     Atom *p=XListProperties(wm->display, c->win, &n);
     if(p)
@@ -198,7 +202,6 @@ void update_frame_prop(WM *wm, Client *c)
                     PropModeReplace, prop, total);
         XFree(p);
     }
-#endif
 }
 
 void create_title_bar(WM *wm, Client *c)
@@ -261,19 +264,34 @@ Client *win_to_client(WM *wm, Window win)
     return NULL;
 }
 
-void del_client(WM *wm, Client *c)
+void del_client(WM *wm, Client *c, bool change_focus)
 {
     if(c)
     {
+        if(is_win_exist(wm, c->win, c->frame))
+            XReparentWindow(wm->display, c->win, wm->root_win, c->x, c->y);
+        XDestroyWindow(wm->display, c->frame);
+        /* XDestroyWindow可能觸發EnterNotify事件，但此時frame已經銷毀了，
+           因而會觸發X錯誤事件，應忽略這些錯誤事件。 */
+        XSync(wm->display, True);
         if(c->area_type == ICONIFY_AREA)
             del_icon(wm, c);
         del_client_node(c);
         fix_area_type(wm);
-        for(size_t i=1; i<=DESKTOP_N; i++)
-            if(is_on_desktop_n(i, c))
-                focus_client(wm, i, NULL);
+        if(change_focus)
+            for(size_t i=1; i<=DESKTOP_N; i++)
+                if(is_on_desktop_n(i, c))
+                    focus_client(wm, i, NULL);
+#if USE_IMAGE_ICON
+        if(c->image)
+        {
+            imlib_context_set_image(c->image);
+            imlib_free_image();
+        }
+#endif
         XFree(c->class_hint.res_class);
         XFree(c->class_hint.res_name);
+        XFree(c->wm_hint);
         free(c->title_text);
         free(c);
     }
@@ -283,20 +301,6 @@ void del_client_node(Client *c)
 {
     c->prev->next=c->next;
     c->next->prev=c->prev;
-}
-
-void free_client(WM *wm, Client *c)
-{
-    if(c->area_type == ICONIFY_AREA)
-    {
-        XDestroyWindow(wm->display, c->icon->win);
-        free(c->icon->title_text);
-        free(c->icon);
-    }
-    XFree(c->class_hint.res_class);
-    XFree(c->class_hint.res_name);
-    free(c->title_text);
-    free(c);
 }
 
 void move_resize_client(WM *wm, Client *c, const Delta_rect *d)
@@ -354,17 +358,10 @@ void focus_client(WM *wm, unsigned int desktop_n, Client *c)
 
     if(desktop_n == wm->cur_desktop)
     {
-        Window win = pc->area_type==ICONIFY_AREA ? pc->icon->win : pc->win;
-        XWMHints *h=XGetWMHints(wm->display, win);
-        if(h && (h->flags & InputHint) && h->input)
-        {
-            XFree(h);
-            XSetInputFocus(wm->display, win, RevertToPointerRoot, CurrentTime);
-        }
-        if(win == wm->root_win)
-            XSetInputFocus(wm->display, PointerRoot, RevertToPointerRoot, CurrentTime);
-        else if(win == pc->win)
-            send_event(wm, wm->icccm_atoms[WM_TAKE_FOCUS], win);
+        if(pc->win == wm->root_win)
+            XSetInputFocus(wm->display, wm->root_win, RevertToPointerRoot, CurrentTime);
+        else if(pc->area_type != ICONIFY_AREA)
+            set_input_focus(wm, pc->wm_hint, pc->win);
         update_client_look(wm, desktop_n, pc);
         update_client_look(wm, desktop_n, d->prev_focus_client);
     }
@@ -395,15 +392,15 @@ static bool is_normal_client(WM *wm, unsigned int desktop_n, Client *c)
     return false;
 }
 
-void update_client_look(WM *wm, unsigned int desktop_n, Client *c)
+static void update_client_look(WM *wm, unsigned int desktop_n, Client *c)
 {
     if(c && c!=wm->clients)
     {
         Desktop *d=wm->desktop+desktop_n-1;
         if(c->area_type==ICONIFY_AREA && d->cur_layout!=PREVIEW)
-            XSetWindowBorder(wm->display, c->icon->win, c==d->cur_focus_client ?
-                wm->widget_color[CURRENT_BORDER_COLOR].pixel :
-                wm->widget_color[NORMAL_BORDER_COLOR].pixel);
+            update_win_background(wm, c->icon->win, c==d->cur_focus_client ?
+                wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel :
+                wm->widget_color[ICON_AREA_COLOR].pixel);
         else
             update_frame(wm, desktop_n,  c);
     }

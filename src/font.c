@@ -42,7 +42,7 @@ char *get_text_prop(WM *wm, Window win, Atom atom)
             result=copy_string(*list), XFreeStringList(list);
         XFree(name.value);
     }
-    else
+    if(!result)
         result=copy_string(win==wm->taskbar.win ? "gwm" : "");
     return result;
 }
@@ -57,7 +57,7 @@ void draw_wcs(WM *wm, Drawable d, const wchar_t *wcs, const String_format *f)
 
 void draw_string(WM *wm, Drawable d, const char *str, const String_format *f)
 {
-    if(str && str[0]!='\0')
+    if(str)
     {
         XftFont *font=wm->font[f->font_type];
         unsigned int w=f->r.w, h=f->r.h, lw, lh, n=strlen(str);
