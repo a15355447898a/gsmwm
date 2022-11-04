@@ -34,6 +34,7 @@ static void handle_leave_notify(WM *wm, XEvent *e);
 static void handle_map_request(WM *wm, XEvent *e);
 static void handle_unmap_notify(WM *wm, XEvent *e);
 static void handle_property_notify(WM *wm, XEvent *e);
+static void handle_wm_transient_for_notify(WM *wm, Client *c, Window win);
 static void handle_selection_notify(WM *wm, XEvent *e);
 static bool is_func_click(WM *wm, Widget_type type, Buttonbind *b, XEvent *e);
 static void focus_clicked_client(WM *wm, Window win);
@@ -58,7 +59,7 @@ void handle_events(WM *wm)
 {
 	XEvent e;
     XSync(wm->display, False);
-	while(run_flag && !XNextEvent(wm->display, &e))
+    while(run_flag && !XNextEvent(wm->display, &e))
         if(!XFilterEvent(&e, None))
             handle_event(wm, &e);
 }
@@ -163,13 +164,13 @@ static void handle_enter_notify(WM *wm, XEvent *e)
         act=ADJUST_LAYOUT_RATIO;
     else if(IS_TASKBAR_BUTTON(type))
         update_win_background(wm, win,
-            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel);
+            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel, None);
     else if(type == CLIENT_ICON)
         update_win_background(wm, win,
-            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel);
+            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel, None);
     else if(IS_CMD_CENTER_ITEM(type))
         update_win_background(wm, win,
-            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel);
+            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel, None);
     else if(type == CLIENT_FRAME)
         act=get_resize_act(c, &m);
     else if(type == TITLE_AREA)
@@ -177,7 +178,7 @@ static void handle_enter_notify(WM *wm, XEvent *e)
     else if(IS_TITLE_BUTTON(type))
         update_win_background(wm, win, type==CLOSE_BUTTON ?
             wm->widget_color[ENTERED_CLOSE_BUTTON_COLOR].pixel :
-            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel);
+            wm->widget_color[ENTERED_NORMAL_BUTTON_COLOR].pixel, None);
     XDefineCursor(wm->display, win, wm->cursors[act]);
     handle_pointer_hovers(wm, win, type);
 }
@@ -362,9 +363,9 @@ static void handle_leave_notify(WM *wm, XEvent *e)
     if(IS_TASKBAR_BUTTON(type))
         hint_leave_taskbar_button(wm, type);
     else if(type == CLIENT_ICON)
-        update_win_background(wm, win, wm->widget_color[ICON_AREA_COLOR].pixel);
+        update_win_background(wm, win, wm->widget_color[ICON_AREA_COLOR].pixel, None);
     else if(IS_CMD_CENTER_ITEM(type))
-        update_win_background(wm, win, wm->widget_color[CMD_CENTER_COLOR].pixel);
+        update_win_background(wm, win, wm->widget_color[CMD_CENTER_COLOR].pixel, None);
     else if(IS_TITLE_BUTTON(type))
         hint_leave_title_button(wm, win_to_client(wm, win), type);
 }
@@ -375,7 +376,7 @@ static void hint_leave_taskbar_button(WM *wm, Widget_type type)
         wm->widget_color[CHOSEN_TASKBAR_BUTTON_COLOR].pixel :
         wm->widget_color[NORMAL_TASKBAR_BUTTON_COLOR].pixel ;
     Window win=wm->taskbar.buttons[TASKBAR_BUTTON_INDEX(type)];
-    update_win_background(wm, win, color);
+    update_win_background(wm, win, color, None);
 }
 
 static void hint_leave_title_button(WM *wm, Client *c, Widget_type type)
@@ -383,7 +384,7 @@ static void hint_leave_title_button(WM *wm, Client *c, Widget_type type)
     Window win=c->buttons[TITLE_BUTTON_INDEX(type)];
     update_win_background(wm, win, c==DESKTOP(wm).cur_focus_client ?
         wm->widget_color[CURRENT_TITLE_BUTTON_COLOR].pixel :
-        wm->widget_color[NORMAL_TITLE_BUTTON_COLOR].pixel);
+        wm->widget_color[NORMAL_TITLE_BUTTON_COLOR].pixel, None);
 }
 
 static void handle_map_request(WM *wm, XEvent *e)
@@ -441,6 +442,8 @@ static void handle_property_notify(WM *wm, XEvent *e)
             handle_wm_name_notify(wm, c, win); break;
         case XA_WM_NORMAL_HINTS:
             handle_wm_normal_hints_notify(wm, c, win); break;
+        case XA_WM_TRANSIENT_FOR:
+            handle_wm_transient_for_notify(wm, c, win); break;
         default: break; // 或許其他的情況也應考慮，但暫時還沒遇到必要的情況
     }
 }
@@ -504,12 +507,19 @@ static void handle_wm_normal_hints_notify(WM *wm, Client *c, Window win)
     if(c && c->win==win)
     {
         update_size_hint(wm, c);
-        if(c->area_type == FLOATING_AREA)
+        if( c->area_type==FLOATING_AREA || c->area_type==ICONIFY_AREA
+            || DESKTOP(wm).cur_layout==STACK)
         {
             set_default_rect(wm, c);
             move_resize_client(wm, c, NULL);
         }
     }
+}
+
+static void handle_wm_transient_for_notify(WM *wm, Client *c, Window win)
+{
+    if(c && c->win==win)
+        c->owner=get_transient_for(wm, win);
 }
 
 static void handle_selection_notify(WM *wm, XEvent *e)

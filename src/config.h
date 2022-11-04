@@ -81,7 +81,7 @@
     [TITLE_FONT]            = "monospace:pixelsize="TO_STR(TASKBAR_FONT_PIXEL_SIZE),            \
     [STATUS_AREA_FONT]      = "monospace:pixelsize="TO_STR(TASKBAR_FONT_PIXEL_SIZE),            \
     [ENTRY_FONT]            = "monospace:pixelsize="TO_STR(TASKBAR_FONT_PIXEL_SIZE),            \
-    [HINT_FONT]             = "monospace:pixelsize="TO_STR(HINT_FONT_PIXEL_SIZE),         \
+    [HINT_FONT]             = "monospace:pixelsize="TO_STR(HINT_FONT_PIXEL_SIZE),               \
 }
 
 #define WIDGET_COLOR_NAME (const char *[]) /* 構件顏色名 */                        \
@@ -101,7 +101,8 @@
     [ICON_AREA_COLOR]             = "grey11",       /* 圖標區域的顏色名         */ \
     [STATUS_AREA_COLOR]           = "grey21",       /* 狀態區域的顏色名         */ \
     [ENTRY_COLOR]                 = "white",        /* 單行文本輸入框的顏色名   */ \
-    [HINT_WIN_COLOR]              = "grey21",       /* 提示窗口的顏色名 */         \
+    [HINT_WIN_COLOR]              = "grey21",       /* 提示窗口的顏色名         */ \
+    [ROOT_WIN_COLOR]              = "black",        /* 根窗口的顏色名。无图时用 */ \
 }
 
 #define TEXT_COLOR_NAME (const char *[]) /* 文本顏色名 */                          \
@@ -116,6 +117,10 @@
     [ENTRY_TEXT_COLOR]           = "black",     /* 輸入構件文本的顏色名 */         \
     [HINT_TEXT_COLOR]            = "grey61",    /* 用於提示的文本的顏色名 */       \
 }
+
+#define WALLPAPER_FILENAME "/usr/share/backgrounds/gwm.png" // 壁紙文件名。若刪除本行或文件不能訪問，則使用純色背景。
+#define WALLPAPER_PATHS (const char *[]) /* 壁紙目錄列表，如取消此宏定义或目录为空或不能访问，则切换绝壁时使用纯色 */ \
+{   "/usr/share/wallpapers", "/usr/share/backgrounds",   }
 
 #define TITLE_BUTTON_TEXT (const char *[]) /* 窗口標題欄按鈕的標籤（從左至右）*/ \
 /* 切換至主區域 切換至次區域 切換至固定區 切換至懸浮態 縮微化 最大化 關閉 */     \
@@ -252,6 +257,7 @@
     {WM_SKEY,	XK_m,            adjust_main_area_ratio,      {.change_ratio=-0.01}},      \
     {WM_KEY, 	XK_x,            adjust_fixed_area_ratio,     {.change_ratio=0.01}},       \
     {WM_SKEY,	XK_x,            adjust_fixed_area_ratio,     {.change_ratio=-0.01}},      \
+    {WM_KEY, 	XK_w,            change_wallpaper,            {0}},                        \
     {WM_KEY,	XK_Page_Down,    next_desktop,                {0}},                        \
     {WM_KEY,	XK_Page_Up,      prev_desktop,                {0}},                        \
     DESKTOP_KEYBIND(XK_0, 0),                                                              \

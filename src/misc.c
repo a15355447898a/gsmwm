@@ -11,11 +11,16 @@
 
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <dirent.h>
 #include <stdarg.h>
 #include "gwm.h"
 #include "client.h"
 #include "font.h"
 #include "misc.h"
+
+static void get_files_in_dir(const char *path, const char *exts[], size_t n, File *head, Order order, bool is_fullname);
+static int str_cmp_basename(const char *s1, const char *s2);
+static void create_file_node(File *head, const char *path, char *filename, bool is_fullname);
 
 void *malloc_s(size_t size)
 {
@@ -56,13 +61,39 @@ bool is_wm_win(WM *wm, Window win)
         && attr.map_state!=IsUnmapped && !attr.override_redirect);
 }
 
-/* 在調用XSetWindowBackground之後，在收到下一個顯露事件或調用XClearWindow
- * 之前，背景不變。此處用發送顯露事件的方式使背景設置立即生效。*/
-void update_win_background(WM *wm, Window win, unsigned long color)
+void update_win_background(WM *wm, Window win, unsigned long color, Pixmap pixmap)
 {
-    XEvent event={.xexpose={.type=Expose, .window=win}};
-    XSetWindowBackground(wm->display, win, color);
-    XSendEvent(wm->display, win, False, NoEventMask, &event);
+    if(pixmap)
+    {
+        /* 在調用XSetWindowBackgroundPixmap之後，在調用XClearWindow之
+         * 前，背景不變。*/
+        XSetWindowBackgroundPixmap(wm->display, win, pixmap);
+        XClearWindow(wm->display, win);
+    }
+    else
+    {
+        /* 在調用XSetWindowBackground之後，在收到下一個顯露事件或調用
+         * XClearWindow之前，背景不變。*/
+        XEvent event={.xexpose={.type=Expose, .window=win}};
+        XSetWindowBackground(wm->display, win, color);
+        XSendEvent(wm->display, win, False, NoEventMask, &event);
+    }
+}
+
+Pixmap create_pixmap_from_file(WM *wm, Window win, const char *filename)
+{
+    unsigned int w, h, d;
+    Imlib_Image image=imlib_load_image(filename);
+    if(image && get_geometry(wm, win, &w, &h, &d))
+    {
+        Pixmap bg=XCreatePixmap(wm->display, win, w, h, d);
+        imlib_context_set_image(image);
+        imlib_context_set_drawable(bg);   
+        imlib_render_image_on_drawable_at_size(0, 0, w, h);
+        imlib_free_image();
+        return bg;
+    }
+    return None;
 }
 
 Widget_type get_widget_type(WM *wm, Window win)
@@ -225,13 +256,12 @@ void clear_wm(WM *wm)
     clear_zombies(0);
 }
 
-void get_drawable_size(WM *wm, Drawable drw, unsigned int *w, unsigned int *h)
+bool get_geometry(WM *wm, Drawable drw, unsigned int *w, unsigned int *h, unsigned int *depth)
 {
     Window r;
     int xt, yt;
-    unsigned int bw, d;
-    if(!XGetGeometry(wm->display, drw, &r, &xt, &yt, w, h, &bw, &d))
-        *w=*h=0;
+    unsigned int bw;
+    return XGetGeometry(wm->display, drw, &r, &xt, &yt, w, h, &bw, depth);
 }
 
 char *copy_string(const char *s)
@@ -264,9 +294,9 @@ char *copy_strings(const char *s, ...) // 調用時須以NULL結尾
 /* 坐標均對於根窗口, 後四個參數是將要彈出的窗口的坐標和尺寸 */
 void set_pos_for_click(WM *wm, Window click, int cx, int cy, int *px, int *py, unsigned int pw, unsigned int ph)
 {
-    unsigned int cw, ch, sw=wm->screen_width, sh=wm->screen_height;
+    unsigned int cw=0, ch=0, d, sw=wm->screen_width, sh=wm->screen_height;
 
-    get_drawable_size(wm, click, &cw, &ch);
+    get_geometry(wm, click, &cw, &ch, &d);
 
     if(cx < 0) // 窗口click左邊出屏
         cw=cx+pw, cx=0;
@@ -301,4 +331,43 @@ bool is_win_exist(WM *wm, Window win, Window parent)
             if(win == child[i])
                 { XFree(child); return true; }
     return false;
+}
+
+File *get_files_in_dirs(const char *paths[], size_t n, const char *exts[], size_t m, Order order, bool is_fullname)
+{
+    File *head=malloc_s(sizeof(File));
+    head->next=NULL, head->name=NULL;
+    for(size_t i=0; i<n; i++)
+        get_files_in_dir(paths[i], exts, m, head, order, is_fullname);
+    return head;
+}
+
+static void get_files_in_dir(const char *path, const char *exts[], size_t n, File *head, Order order, bool is_fullname)
+{
+    char *p, *fn;
+    DIR *dir=opendir(path);
+    for(struct dirent *d=NULL; dir && (d=readdir(dir)); )
+        if((fn=d->d_name) && strncmp(".", fn, 2) && strncmp("..", fn, 3))
+            for(size_t i=0; i<n; i++)
+                if(exts[i][0]=='\0' || ((p=strrchr(fn, '.')) && !strcmp(p+1, exts[i])))
+                    for(File *f=head; f; f=f->next)
+                        if(!order || !f->next || str_cmp_basename(fn, f->next->name)/order>0)
+                            { create_file_node(f, path, fn, is_fullname), i=n; break; }
+    if(dir)
+        closedir(dir);
+}
+
+static int str_cmp_basename(const char *s1, const char *s2)
+{
+    const char *p1=strrchr(s1, '/'), *p2=strrchr(s2, '/');
+    p1=(p1 ? p1+1 : s1), p2=(p2 ? p2+1 : s2);
+    return strcmp(p1, p2);
+}
+
+static void create_file_node(File *head, const char *path, char *filename, bool is_fullname)
+{
+    File *file=malloc_s(sizeof(File));
+    file->name = is_fullname ? copy_strings(path, "/", filename, NULL) : copy_string(filename);
+    file->next=head->next;
+    head->next=file;
 }

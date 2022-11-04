@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <wchar.h>
+#include <Imlib2.h>
 #include <X11/Xatom.h>
 #include <X11/Xproto.h>
 #include <X11/Xft/Xft.h>
@@ -60,6 +61,19 @@
     ((type)>=CMD_CENTER_ITEM_BEGIN && (type)<=CMD_CENTER_ITEM_END)
 
 #define DESKTOP(wm) (wm->desktop[wm->cur_desktop-1])
+
+enum order_tag // 文件名排序类型
+{
+    RISE=-1, NOSORT=0, FALL=1 // 依次为升序、不排序、降序
+};
+typedef enum order_tag Order;
+
+struct file_tag
+{
+    char *name;
+    struct file_tag *next;
+};
+typedef struct file_tag File;
 
 enum focus_mode_tag // 窗口聚焦模式
 {
@@ -118,7 +132,6 @@ struct rectangle_tag // 矩形窗口的坐標和尺寸
 };
 typedef struct rectangle_tag Rect;
 
-#include<Imlib2.h>
 struct icon_tag // 縮微窗口相關信息
 {
     Window win; // 縮微窗口
@@ -131,8 +144,8 @@ struct icon_tag // 縮微窗口相關信息
 typedef struct icon_tag Icon;
 
 struct client_tag // 客戶窗口相關信息
-{   /* 分別爲客戶窗口、父窗口、標題區、標題區按鈕 */
-    Window win, frame, title_area, buttons[TITLE_BUTTON_N];
+{   /* 分別爲客戶窗口、父窗口、標題區、標題區按鈕、臨時窗口對應的主窗口 */
+    Window win, frame, title_area, buttons[TITLE_BUTTON_N], owner;
     int x, y; // win的橫、縱坐標
     /* win的寬、高、標題欄高、邊框寬、所属虚拟桌面的掩碼 */
     unsigned int w, h, title_bar_h, border_w, desktop_mask;
@@ -212,7 +225,7 @@ enum widget_color_tag // 構件顏色類型
     ENTERED_NORMAL_BUTTON_COLOR, ENTERED_CLOSE_BUTTON_COLOR,
     NORMAL_TASKBAR_BUTTON_COLOR, CHOSEN_TASKBAR_BUTTON_COLOR,
     CMD_CENTER_COLOR, ICON_COLOR, ICON_AREA_COLOR, STATUS_AREA_COLOR,
-    ENTRY_COLOR, HINT_WIN_COLOR,
+    ENTRY_COLOR, HINT_WIN_COLOR, ROOT_WIN_COLOR,
     WIDGET_COLOR_N 
 };
 typedef enum widget_color_tag Widget_color;
@@ -257,6 +270,7 @@ struct wm_tag // 窗口管理器相關信息
     Client *clients; // 頭結點
     Focus_mode focus_mode; // 窗口聚焦模式
     XftFont *font[FONT_N]; // 窗口管理器用到的字體
+    File *wallpapers, *cur_wallpaper; // 壁紙文件列表、当前壁纸文件
     Cursor cursors[POINTER_ACT_N]; // 光標
     Taskbar taskbar; // 任務欄
     Menu cmd_center; // 操作中心
